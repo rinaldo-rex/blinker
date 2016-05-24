@@ -24,6 +24,7 @@ var i = 0;//loop initialization variable
 
 //Connecting to the IOTF
 
+final_flag = false;
 appClient.connect();
 var totalRating = 0.0;
 var rateCount = 0;
@@ -36,15 +37,27 @@ appClient.on("deviceEvent", function (deviceType, deviceId, eventType, format, p
 	        console.log("Device Event from :: "+deviceType+" : "+deviceId+" of event "+eventType+" with payload : "+payload);
             console.log("totalRating as of now " +  totalRating);
             console.log("Current Count: "+rateCount);
+            console.log("Current rating: "+JSON.parse(payload).Rating);
             rateCount++;
-            totalRating += JSON.parse(payload).Rating;
+            if(JSON.parse(payload).Rating>5) 
+                {final_flag = true;}
+            if(final_flag){
+                totalRating += (JSON.parse(payload).Rating)/6;
+            }
+            else{
+            totalRating += JSON.parse(payload).Rating;}
             var aggRate = Math.round(totalRating/rateCount);
             console.log("Aggregated rating: " +aggRate);
             if(aggRate>3){led = green_led;}
             else if(aggRate==3){led = orange_led;}
             else {led = red_led;}
             led.on();
-            sleep.usleep(100000);
+            if(final_flag)
+                {
+                    sleep.sleep(5)
+                }
+            else{
+            sleep.usleep(100000);}
             led.off();
 //            for(var i=0; i<aggRate; i++){
 //                console.log("Blinking");
